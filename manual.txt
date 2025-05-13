@@ -1,0 +1,407 @@
+                                  PSVrammed
+
+Created by mechaskrom.
+mechaskrom@gmail.com
+
+Table of contents:
+ 1. Introduction
+ 2. Installation
+ 3. PlayStation VRAM overview
+ 4. Modes
+ 5. Compare
+ 6. Palette editor
+ 7. Edit values dialog
+ 8. Invert operation and layers
+ 9. Tools
+10. Title bar and status bar
+11. Menu bar
+12. Keyboard
+13. Changelog
+
+
+1. Introduction ---------------------------------------------------------------
+
+PSVrammed is a PlayStation 1 emulator state VRAM viewer and simple editor. With
+it you can open state files and view the VRAM content and then save it as
+images or edit it and save the changes back to the state file. Its primary use
+is to rip graphics from games or to temporarily change graphics when taking
+emulator screenshots. I created it when I was working on making maps for a game
+because I needed a simple way to screenshot different layers.
+
+How well the editor works for changing graphics depends on how often the game
+reloads VRAM. Usually that only happens when you move between different places
+in a game.
+
+Supported emulator state files at the moment are:
+-ePSXe
+-pSX (PSXFin)
+-BizHawk Octoshock PSX core
+-DuckStation
+
+Raw 1MB VRAM dumps are also supported.
+
+PSVrammed cannot convert files so saved file will be in the same format as the
+source.
+
+
+2. Installation ---------------------------------------------------------------
+
+No installation is needed. Just run the exe file to start PSVrammed.
+Microsoft's .NET 6.0 desktop runtime is required though, but if it's missing
+you should get a prompt directing you to the installer.
+
+
+3. PlayStation VRAM overview --------------------------------------------------
+
+To use PSVrammed it is good to have at least some basic understanding of how
+PlayStation graphics and video ram (VRAM) work. Documentation and info can be
+found on the internet so I suggest a look if all of this is unknown to you.
+
+A typical VRAM layout is shown below. Games don't have to use this layout, but
+it is very common. The important thing here is the three major parts in VRAM.
+
+    +--------------------+----------------------------------------------+
+    |                    |                                              |
+    |                    |                                              |
+    |                    |                                              |
+    |                    |                                              |
+    |    Framebuffers    |                                              |
+    |                    |                   Textures                   |
+    |                    |                                              |
+    |                    |                                              |
+    |                    |                                              |
+    |                    |                                              |
+    +--------------------+                                              |
+    |      Palettes      |                                              |
+    +--------------------+----------------------------------------------+
+
+Framebuffers (16 bit or 24 bit):
+2 buffers (double buffering). One is outputted to the display while the other
+is used for drawing the next frame to be displayed.
+
+Textures (4 bit, 8 bit, 16 bit or 24 bit):
+Actual graphic to use for drawing stuff.
+
+Palettes (16 bit):
+Also known as color lookup tables (CLUT). Contains the colors to use for 4 bit
+and 8 bit textures.
+
+VRAM content is stored in one of four different formats or bit depths:
+-4 bits form an index (0 to 15) into a palette.
+-8 bits form an index (0 to 255) into a palette.
+-16 bits form an RGB color. Red, green and blue have five bits each for
+intensity (0 to 31). The extra alpha bit is used for color blending or masking.
+-24 bits form an RGB color. Red, green and blue have eight bits each for
+intensity (0 to 255).
+
+The different VRAM parts and bit depths are reflected in the different modes
+PSVrammed can be used in.
+
+
+4. Modes ----------------------------------------------------------------------
+
+PSVrammed can display four different windows and which are displayed depends
+on the mode used. Each window also has a marker to select current area to work
+with. The four windows are (arranged in order displayed, top to bottom):
+-Texture displays VRAM in currently selected bit depth. Here you can edit VRAM
+or save it as images.
+-Compare displays VRAM in 16 bit. Here you can compare 4 bit and 8 bit textures
+with the framebuffers to check that the same palette is used.
+-Palette displays VRAM in 16 bit. Here you can select the palette to use for
+4 bit and 8 bit textures.
+-Palette editor displays a table with the currently selected palette's entries.
+Here you can edit the palette.
+
+The different modes in PSVrammed and what windows they display:
+                                Texture   Compare   Palette   Palette editor
+-4 bit indexed view              4 bit       -        yes        -
+-4 bit indexed compare           4 bit      yes       yes        -
+-4 bit indexed palette editor    4 bit       -        yes       yes
+-8 bit indexed view              8 bit       -        yes        -
+-8 bit indexed compare           8 bit      yes       yes        -
+-8 bit indexed palette editor    8 bit       -        yes       yes
+-16 bit rgb view                16 bit       -         -         -
+-24 bit rgb view                24 bit       -         -         -
+
+
+5. Compare --------------------------------------------------------------------
+
+Indexed textures can be compared against the framebuffers to check that the
+correct palette is selected before ripping/saving the texture. This will not
+work if the game is using overlays or other transparent effects that will
+change the texture in the framebuffer.
+
+How to use. Select the texture you want to check with the texture marker and
+then select the palette candidate with the palette marker. Now move the compare
+marker so it aligns with the texture drawn to the framebuffer. Flip the texture
+if the orientation doesn't match. Matching pixels will get a different hue. Try
+another palette if not the whole part you want to match is colored differently.
+
+Hue for matching pixels and level of transparency can be changed in the config
+markers dialog.
+
+
+6. Palette editor -------------------------------------------------------------
+
+Double-click or press enter to edit wanted palette entry. The dialog for
+entering the new value is similar to 16 bit edit value so see section "7. Edit
+values dialog" for information about how it works. The set all entries button
+will change the whole palette to the entered value.
+
+Recently entered colors and masks are stored and can be selected in the dialog.
+
+The previous entry edit can also be repeated at the palette marker's current
+location. This makes it easy to perform the same edit to multiple palettes.
+
+
+7. Edit values dialog ---------------------------------------------------------
+
+Four values can be changed in this dialog. The value to use in 4 bit, 8 bit,
+16 bit and 24 bit texture edit. To the left is the value in hexadecimal and to
+the right is the value in index or color.
+
+4 bit and 8 bit also shows resulting color from currently used palette.
+16 bit and 24 bit color can be selected from a color dialog by clicking a
+button if you don't want to set the value manually.
+
+16 bit and 24 bit can also specify a mask to use. A checked box means that this
+part of the value will not be used/changed. For example if you check the box
+for alpha and green then these parts will not change in VRAM when editing. Only
+the bits for red and blue will change.
+
+
+8. Invert operation and layers ------------------------------------------------
+
+The invert operation is perhaps a bit strange, but it's useful when working
+with layers in games. It will collect all edits performed until previous invert
+(if any exist), set VRAM (marked or all) to current value and then undo
+collected edits. If there is nothing to invert the invert operation will be
+disabled or do nothing.
+
+Example of use is when ripping two layers in a game. Open the state file, clear
+one layer in VRAM (textures and/or palettes), save the changes and screenshot
+the remaining layer in the emulator. Now go back to PSVrammed and use invert to
+make VRAM only contain the layer you removed before, save the changes and
+screenshot the other layer. Use invert and edit sequences to save time and
+work.
+
+Remember to clear the alpha flag for all entries in the palette when mapping
+transparent 4 bit or 8 bit layers or else the layer will have incorrect colors.
+The same applies to 16 bit layers, but there you have to clear the flag in the
+textures used.
+
+
+9. Tools ----------------------------------------------------------------------
+
+PSVrammed is designed to be used with a keyboard primarly, but some mouse-
+functions are supported and tools decide how the mouse will work. The different
+tools and their functions are:
+-None, no function.
+-Zoom image, left click to zoom in, right click to zoom out.
+-Situate marker, move marker, left click saves location, right click to cancel.
+-Inspect pixel, left click saves pixel info, right click to cancel.
+-Edit, left click to edit, right click to cancel.
+
+Inspect displays info about the pixel under the mouse cursor. Location, index,
+alpha, red, green and blue. Indexed windows (4 bit or 8 bit) displays index
+and resulting color from currently used palette. RGB windows displays color.
+The info is also displayed in the status bar and a left click will keep it
+there.
+
+
+10. Title bar and status bar --------------------------------------------------
+
+The title bar displays current mode and open state file name. An asterisk after
+the file name indicates that changes aren't saved.
+
+The status bar is divided into four sections. From left to right:
+-Texture displays texture marker's location (XY) and size (WH).
+-Compare displays compare marker's location (XY), orientation of texture
+(F, flipped vertically/horizontally) and result alpha (A).
+-Palette displays palette marker's location (XY).
+-Inspect displays info about inspected pixel.
+
+Texture, compare and palette sections also displays zoom level for respective
+window and if alpha status layer is currently showed (@ appended).
+
+Example:
+Texture@ (x3): XY=0256,128 WH=064,128
+Alpha showed, x3 zoom, marker is located at x=256, y=128 and is 64x128 pixels.
+
+
+11. Menu bar ------------------------------------------------------------------
+
+Short summary of all menu items.
+
+File:
+-Open, open a state file.
+-Reopen, reopen state file.
+-Save, save changes to state file.
+-Save as, save state file under a new name.
+-Save texture, save texture window within marker as an image.
+-Save texture all, save whole texture window as an image.
+-Open edit sequence[*1], open file with edits and perform them.
+-Save edit sequence, save edits performed so far to a file.
+-Show file info, display info about opened state file.
+-About, display info about PSVrammed.
+-Exit, exit PSVrammed.
+
+Edit:
+-Undo, undo last edit.
+-Redo, redo last undo.
+-Set value, edit within texture marker to currently selected value.
+-Clear alpha, edit alpha bit to 0 within texture or palette marker.
+-Set alpha, edit alpha bit to 1 within texture or palette marker.
+-Invert, (see section "8. Invert operation and layers").
+-Invert all, (see section "8. Invert operation and layers").
+-Copy, copy within texture marker.
+-Cut, performs both copy and set value.
+-Paste, paste within texture marker.
+-Texture to clipboard, copy texture window within marker to clipboard.
+-Texture all to clipboard, copy whole texture window to clipboard.
+-Palette entry, open palette entry edit dialog.
+-Repeat palette entry, repeat previous palette entry edit at the palette
+  marker's current location.
+
+Mode:
+(switch mode, see section "4. Modes")
+
+Tool:
+(switch tool, see section "8. Tools")
+
+Config:
+-Markers, open dialog for changing some marker settings.
+-Edit values, open dialog for setting edit value to use.
+-Edit slots, open dialog for setting paths to edit sequences.
+-Show texture alpha[*2], texture window status of extra bit in 16 bit format.
+-Show compare alpha, compare window status of extra bit in 16 bit format.
+-Show palette alpha, palette window status of extra bit in 16 bit format.
+-Update situating marker, select if situate marker tool should continuously
+  update. Continuous update uses a lot of CPU-time so it isn't recommended.
+
+[*1]
+An edit sequence is a list of edit commands to perform. No VRAM content is
+saved in an edit sequence, only operations. Useful if you want to perform the
+same edits to many state files or to repeat a common pattern. Saved edit
+sequences can be bound to keys (edit slots) for quick access.
+
+[*2]
+Alpha bit status is displayed as an overlay. Blue hue means alpha bit is 0 and
+yellow hue means it is 1.
+
+
+12. Keyboard ------------------------------------------------------------------
+
+List of all shortcut keys:
+Open file                                                   Ctrl+O
+Reopen file                                                 Ctrl+R
+Save file                                                   Ctrl+S
+Save file as                                                Ctrl+Shift+S
+Save texture                                                Ctrl+T
+Save texture all                                            Ctrl+Shift+T
+Open edit sequence                                          Ctrl+Q
+Save edit sequence                                          Ctrl+U
+Undo edit                                                   Ctrl+Z
+Redo edit                                                   Ctrl+Y
+Edit set value                                              Delete
+Edit set value ignore black                                 Shift+Delete
+Edit clear alpha                                            P
+Edit set alpha                                              Shift+P
+Edit invert                                                 I
+Edit invert all                                             Shift+I
+Edit copy                                                   Ctrl+C
+Edit cut                                                    Ctrl+X
+Edit paste                                                  Ctrl+V
+Edit copy texture to clipboard                              T
+Edit copy texture all to clipboard                          Shift+T
+Edit palette entry                                          Enter
+Repeat edit palette entry                                   Ctrl+Delete
+Edit palette all entries ignore black                       Ctrl+Shift+Delete
+Switch mode to 4 bit view                                   F1
+Switch mode to 4 bit compare                                Shift+F1
+Switch mode to 4 bit palette editor                         Ctrl+F1
+Switch mode to 8 bit view                                   F2
+Switch mode to 8 bit compare                                Shift+F2
+Switch mode to 8 bit palette editor                         Ctrl+F2
+Switch mode to 16 bit view                                  F3
+Switch mode to 24 bit view                                  F4
+Switch tool to none                                         F8
+Switch tool to zoom                                         F9
+Switch tool to situate                                      F10
+Switch tool to inspect                                      F11
+Switch tool to edit                                         F12
+Open config markers dialog                                  F5
+Open config edit values dialog                              F6
+Open config edit slots dialog                               F7
+Toggle show texture alpha                                   A
+Toggle show compare alpha                                   Shift+A
+Toggle show palette alpha                                   Ctrl+A
+Move texture marker up                                      Up
+Move texture marker up alt                                  Alt+Up
+Move texture marker down                                    Down
+Move texture marker down alt                                Alt+Down
+Move texture marker left                                    Left
+Move texture marker left alt                                Alt+Left
+Move texture marker right                                   Right
+Move texture marker right alt                               Alt+Right
+Move compare marker up                                      Shift+Up
+Move compare marker up alt                                  Shift+Alt+Up
+Move compare marker down                                    Shift+Down
+Move compare marker down alt                                Shift+Alt+Down
+Move compare marker or palette editor index left            Shift+Left
+Move compare marker or palette editor index left alt        Shift+Alt+Left
+Move compare marker or palette editor index right           Shift+Right
+Move compare marker or palette editor index right alt       Shift+Alt+Right
+Move palette marker up                                      Ctrl+Up
+Move palette marker up alt                                  Ctrl+Alt+Up
+Move palette marker down                                    Ctrl+Down
+Move palette marker down alt                                Ctrl+Alt+Down
+Move palette marker left                                    Ctrl+Left
+Move palette marker left alt                                Ctrl+Alt+Left
+Move palette marker right                                   Ctrl+Right
+Move palette marker right alt                               Ctrl+Alt+Right
+Zoom in texture                                             +
+Zoom out texture                                            -
+Zoom in compare                                             Shift++
+Zoom out compare                                            Shift+-
+Zoom in palette                                             Ctrl++
+Zoom out palette                                            Ctrl+-
+Texture marker snap location                                Home
+Texture marker snap location alt                            Alt+Home
+Compare marker snap location                                Shift+Home
+Compare marker snap location alt                            Shift+Alt+Home
+Palette marker snap location                                Ctrl+Home
+Palette marker snap location alt                            Ctrl+Alt+Home
+Texture marker step size up                                 PageUp
+Texture marker step size down                               PageDown
+Texture marker step width up                                Shift+PageUp
+Texture marker step width down                              Shift+PageDown
+Texture marker step height up                               Ctrl+PageUp
+Texture marker step height down                             Ctrl+PageDown
+Texture marker reset size to default                        N
+Compare marker flip horizontally                            H
+Compare marker flip vertically                              V
+Compare marker step result alpha up                         Shift+G
+Compare marker step result alpha down                       Shift+B
+Open slot 1 edit                                            1
+Open slot 2 edit                                            2
+Open slot 3 edit                                            3
+Open slot 4 edit                                            4
+Open slot 5 edit                                            5
+Open slot 6 edit                                            6
+Open slot 7 edit                                            7
+Open slot 8 edit                                            8
+Open slot 9 edit                                            9
+Open slot 10 edit                                           0
+
+
+13. Changelog -----------------------------------------------------------------
+
+1.1 (2025-05-13):
+-First public release.
+
+1.0 (2014-11-05):
+-Never released publicly.
+
+
+EOF ---------------------------------------------------------------------------

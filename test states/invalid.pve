@@ -1,0 +1,39 @@
+﻿File type: pSX save state
+
+Header: ARS2
+
+Chunk type= 0x00555043 : CPU
+Chunk size= 0x294
+
+Chunk type= 0x004D4152 : RAM
+Chunk size= 0x200400
+
+Chunk type= 0x53494F01 : OIS
+Chunk size= 0x3B
+
+Chunk type= 0x53494F00 : OIS
+Chunk size= 0x4A
+
+Chunk type= 0x43445206 : RDC
+Chunk size= 0x9CC
+
+Chunk type= 0x4D444301 : CDM
+Chunk size= 0x20214
+
+Chunk type= 0x52435200 : RCR
+Chunk size= 0x4
+
+Chunk type= 0x494E5401 : TNI
+Chunk size= 0xC
+
+Chunk type= 0x444D4101 : AMD
+Chunk size= 0x138
+
+Chunk type= 0x53505506 : UPS
+Chunk size= 0x80C90
+
+Chunk type= 0x47505500 : UPG
+Chunk size= 0x1000BB
+
+Chunk type= 0x52435404 : TCR
+Chunk size= 0xE8
