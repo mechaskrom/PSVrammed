@@ -7,11 +7,12 @@ Its primary use is to rip graphics from games or to temporarily change graphics 
 How well the editor works for changing graphics depends on how often the game reloads VRAM. Usually that only happens when you move between different places in a game.
 
 Supported emulator state files at the moment are:
+```
 -ePSXe
 -pSX (PSXFin)
 -BizHawk Octoshock PSX core
 -DuckStation
-
+```
 Raw 1MB VRAM dumps are also supported.
 
 PSVrammed cannot convert files so saved file will be in the same format as the source.
